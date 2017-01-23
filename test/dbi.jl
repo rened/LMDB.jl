@@ -36,11 +36,9 @@ module LMDB_DBI
                 open(txn, flags = Cuint(LMDB.REVERSEKEY)) do dbi
                     k = key
                     value = get(txn, dbi, k, AbstractString)
-                    println("Got value for key $(k): $(value)")
                     @test value == val*string(k)
                     k += 1
                     value = get(txn, dbi, k, AbstractString)
-                    println("Got value for key $(k): $(value)")
                     @test value == val*string(k)
                     delete!(txn, dbi, k, value)
                     @test_throws LMDBError get(txn, dbi, k, AbstractString)

@@ -1,3 +1,5 @@
+println("\n\n\n---")
+
 tests = ["common", "env", "dbi", "cur"]
 
 for t in tests
@@ -6,3 +8,4 @@ for t in tests
     include(fp)
 end
 
+println("done!")

@@ -25,7 +25,7 @@ module LMDB_Env
     @test env[:Readers] == 100
 
     # open db
-    mkdir(dbname)
+    mkpath(dbname)
     try
         ret = open(env, dbname)
         @test ret[1] == 0
