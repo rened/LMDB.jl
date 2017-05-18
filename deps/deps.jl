@@ -9,7 +9,7 @@ macro checked_lib(libname, path)
 end
 
 # Load dependencies
-@checked_lib liblmdb "/home/rene/.julia/v0.4/LMDB/deps/usr/lib/liblmdb.so"
+@checked_lib liblmdb "liblmdb.so"
 
 # Load-hooks
 
