@@ -1,25 +1,25 @@
-using BinDeps
+# using BinDeps
 
-@BinDeps.setup
+# @BinDeps.setup
 
-version = "0.9.18"
-url = "https://github.com/LMDB/lmdb/archive/LMDB_$(version).tar.gz"
+# version = "0.9.18"
+# url = "https://github.com/LMDB/lmdb/archive/LMDB_$(version).tar.gz"
 
-liblmdb = library_dependency("liblmdb")
+# liblmdb = library_dependency("liblmdb")
 
-provides(Sources, URI(url), liblmdb, unpacked_dir="lmdb-LMDB_$version")
+# provides(Sources, URI(url), liblmdb, unpacked_dir="lmdb-LMDB_$version")
 
-lmdbsrcdir = joinpath(BinDeps.srcdir(liblmdb),"lmdb-LMDB_$version","libraries","liblmdb")
-lmdblibfile = joinpath(BinDeps.libdir(liblmdb),liblmdb.name*"."*BinDeps.shlib_ext)
+# lmdbsrcdir = joinpath(BinDeps.srcdir(liblmdb),"lmdb-LMDB_$version","libraries","liblmdb")
+# lmdblibfile = joinpath(BinDeps.libdir(liblmdb),liblmdb.name*"."*BinDeps.shlib_ext)
 
-provides(BuildProcess,
-	(@build_steps begin
-		GetSources(liblmdb)
-		CreateDirectory(BinDeps.libdir(liblmdb))
-		FileRule(lmdblibfile, @build_steps begin
-			MakeTargets(lmdbsrcdir, ["liblmdb.so"])
-			`mv $lmdbsrcdir/liblmdb.so $lmdblibfile`
-		end)
-	end), liblmdb)
+# provides(BuildProcess,
+# 	(@build_steps begin
+# 		GetSources(liblmdb)
+# 		CreateDirectory(BinDeps.libdir(liblmdb))
+# 		FileRule(lmdblibfile, @build_steps begin
+# 			MakeTargets(lmdbsrcdir, ["liblmdb.so"])
+# 			`mv $lmdbsrcdir/liblmdb.so $lmdblibfile`
+# 		end)
+# 	end), liblmdb)
 
-@BinDeps.install Dict( :liblmdb => :liblmdb)
+# @BinDeps.install Dict( :liblmdb => :liblmdb)
