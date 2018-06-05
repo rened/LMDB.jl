@@ -1,9 +1,9 @@
 """
 A handle to a cursor structure for navigating through a database.
 """
-type Cursor
-    handle::Ptr{Void}
-    Cursor(cur::Ptr{Void}) = new(cur)
+mutable struct Cursor
+    handle::Ptr{Nothing}
+    Cursor(cur::Ptr{Nothing}) = new(cur)
 end
 
 "Check if cursor is open"
@@ -11,9 +11,9 @@ isopen(cur::Cursor) = cur.handle != C_NULL
 
 "Create a cursor"
 function open(txn::Transaction, dbi::DBI)
-    cur_ptr_ref = Ref{Ptr{Void}}(C_NULL)
+    cur_ptr_ref = Ref{Ptr{Nothing}}(C_NULL)
     ret = ccall((:mdb_cursor_open, liblmdb), Cint,
-                 (Ptr{Void}, Cuint, Ptr{Ptr{Void}}),
+                 (Ptr{Nothing}, Cuint, Ptr{Ptr{Nothing}}),
                   txn.handle, dbi.handle, cur_ptr_ref)
     (ret != 0) && throw(LMDBError(ret))
     return Cursor(cur_ptr_ref[])
@@ -34,7 +34,7 @@ function close(cur::Cursor)
     if cur.handle == C_NULL
         warn("Cursor is already closed")
     end
-    ccall((:mdb_cursor_close, liblmdb), Void, (Ptr{Void},), cur.handle)
+    ccall((:mdb_cursor_close, liblmdb), Nothing, (Ptr{Nothing},), cur.handle)
     cur.handle = C_NULL
     return
 end
@@ -42,21 +42,21 @@ end
 "Renew a cursor"
 function renew(txn::Transaction, cur::Cursor)
     ret = ccall((:mdb_cursor_renew, liblmdb), Cint,
-                 (Ptr{Void}, Ptr{Void}), txn.handle, cur.handle)
+                 (Ptr{Nothing}, Ptr{Nothing}), txn.handle, cur.handle)
     (ret != 0) && throw(LMDBError(ret))
     return ret
 end
 
 "Return the cursor's transaction"
 function txn(cur::Cursor)
-    txn_ptr = ccall((:mdb_cursor_txn, liblmdb), Ptr{Void}, (Ptr{Void},), cur.handle)
+    txn_ptr = ccall((:mdb_cursor_txn, liblmdb), Ptr{Nothing}, (Ptr{Nothing},), cur.handle)
     (txn_ptr == C_NULL) && return nothing
     return Transaction(txn_ptr)
 end
 
 "Return the cursor's database"
 function dbi(cur::Cursor)
-    dbi = ccall((:mdb_cursor_dbi, liblmdb), Cuint, (Ptr{Void},), cur.handle)
+    dbi = ccall((:mdb_cursor_dbi, liblmdb), Cuint, (Ptr{Nothing},), cur.handle)
     (dbi == 0) && return nothing
     return DBI(dbi, "")
 end
@@ -65,24 +65,24 @@ end
 
 This function retrieves key/data pairs from the database.
 """
-function get{T}(cur::Cursor, key, ::Type{T}, op::CursorOps=FIRST)
+function get(cur::Cursor, key, ::Type{T}, op::CursorOps=FIRST) where T
     # Setup parameters
     mdb_key_ref = Ref(MDBValue(key))
     mdb_val_ref = Ref(MDBValue())
 
     # Get value
     ret = ccall( (:mdb_cursor_get, liblmdb), Cint,
-                  (Ptr{Void}, Ptr{MDBValue}, Ptr{MDBValue}, Cint),
+                  (Ptr{Nothing}, Ptr{MDBValue}, Ptr{MDBValue}, Cint),
                    cur.handle, mdb_key_ref, mdb_val_ref, Cint(op))
     (ret != 0) && throw(LMDBError(ret))
 
     # Convert to proper type
     mdb_val = mdb_val_ref[]
     if T <: AbstractString
-        return bytestring(convert(Ptr{UInt8}, mdb_val.data), mdb_val.size)
+        return unsafe_string(convert(Ptr{UInt8}, mdb_val.data), mdb_val.size)
     else
         nvals = floor(Int, mdb_val.size/sizeof(T))
-        value = pointer_to_array(convert(Ptr{T}, mdb_val.data), nvals)
+        value = unsafe_wrap(Array, convert(Ptr{T}, mdb_val.data), nvals)
         return length(value) == 1 ? value[1] : value
     end
 end
@@ -96,7 +96,7 @@ function put!(cur::Cursor, key, val; flags::Cuint = zero(Cuint))
     mdb_val_ref = Ref(MDBValue(val))
 
     ret = ccall((:mdb_cursor_put, liblmdb), Cint,
-                 (Ptr{Void}, Ptr{MDBValue}, Ptr{MDBValue}, Cuint),
+                 (Ptr{Nothing}, Ptr{MDBValue}, Ptr{MDBValue}, Cuint),
                   cur.handle, mdb_key_ref, mdb_val_ref, flags)
 
     (ret != 0) && throw(LMDBError(ret))
@@ -106,7 +106,7 @@ end
 "Delete current key/data pair to which the cursor refers"
 function delete!(cur::Cursor; flags::Cuint = zero(Cuint))
     ret = ccall((:mdb_cursor_del, liblmdb), Cint,
-                 (Ptr{Void}, Cuint), cur.handle, flags)
+                 (Ptr{Nothing}, Cuint), cur.handle, flags)
     (ret != 0) && throw(LMDBError(ret))
     return ret
 end
@@ -115,7 +115,7 @@ end
 function count(cur::Cursor)
     countp = Csize_t[0]
     ret = ccall( (:mdb_cursor_count, liblmdb), Cint,
-                  (Ptr{Void}, Csize_t), cur.handle, countp)
+                  (Ptr{Nothing}, Csize_t), cur.handle, countp)
     (ret != 0) && throw(LMDBError(ret))
     return Int(countp[1])
 end

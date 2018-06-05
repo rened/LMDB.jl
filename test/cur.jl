@@ -1,6 +1,6 @@
 module LMDB_CUR
     using LMDB
-    using Base.Test
+    using Test
 
     const dbname = "testdb"
     key = 10

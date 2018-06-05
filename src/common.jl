@@ -1,13 +1,15 @@
-typealias Cmode_t Cushort
+const Cmode_t = Cushort
 
 "Generic structure used for passing keys and data in and out of the database."
-type MDBValue
+mutable struct MDBValue
     size::Csize_t   # size of the data item
-    data::Ptr{Void} # address of the data item
+    data::Ptr{Nothing} # address of the data item
 end
 MDBValue() = MDBValue(zero(Csize_t), C_NULL)
 function MDBValue(val)
-    val_size = sizeof(val)
+    val_size_old = sizeof(val)
+    val_size = isa(val,String) ? sizeof(val) : length(val)*sizeof(eltype(val))
+    # @show val, val_size_old, val_size
     val = isa(val, Number) ? typeof(val)[val] : val
     return MDBValue(val_size, pointer(val))
 end
@@ -89,7 +91,7 @@ function version()
     minor = Cint[0]
     patch = Cint[0]
     ver_str = ccall( (:mdb_version, liblmdb), Cstring, (Ptr{Cint}, Ptr{Cint}, Ptr{Cint}), major, minor, patch)
-    return VersionNumber(major[1],minor[1],patch[1]), bytestring(ver_str)
+    return VersionNumber(major[1],minor[1],patch[1]), string(ver_str)
 end
 
 """Return a string describing a given error code
@@ -99,11 +101,11 @@ Function returns description of the error as a string. It accepts following argu
 """
 function errormsg(err::Cint)
     errstr = ccall( (:mdb_strerror, liblmdb), Cstring, (Cint,), err)
-    return bytestring(errstr)
+    return unsafe_string(errstr)
 end
 
 """LMDB exception type"""
-immutable LMDBError <: Exception
+struct LMDBError <: Exception
     code::Cint
     msg::AbstractString
     LMDBError(code::Cint) = new(code, errormsg(code))

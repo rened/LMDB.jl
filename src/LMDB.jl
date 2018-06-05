@@ -1,7 +1,7 @@
-__precompile__(true)
+# __precompile__(true)
 module LMDB
 
-    isdefined(:Docile) && eval(:(@document))
+    using Nullables, Pkg, Libdl
 
     import Base: open, close, getindex, setindex!, put!, start, reset,
                  isopen, count, delete!, drop, info, get, show
