@@ -1,4 +1,3 @@
-__precompile__(true)
 module LMDB
 
     using Nullables, Pkg, Libdl
