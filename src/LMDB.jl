@@ -3,9 +3,12 @@ module LMDB
     using Nullables, Pkg, Libdl
 
     import Base: open, close, getindex, setindex!, put!, start, reset,
-                 isopen, count, delete!, drop, info, get, show
+                 isopen, count, delete!, info, get, show
+    import Base.Iterators: drop
 
-    depsfile = Pkg.dir("LMDB","deps","deps.jl")
+    import LMDB
+    depsfile = joinpath(dirname(pathof(LMDB)), "..", "deps", "deps.jl")
+    @show depsfile
     if isfile(depsfile)
         include(depsfile)
     else
