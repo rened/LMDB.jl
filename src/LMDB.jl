@@ -8,7 +8,6 @@ module LMDB
 
     import LMDB
     depsfile = joinpath(dirname(pathof(LMDB)), "..", "deps", "deps.jl")
-    @show depsfile
     if isfile(depsfile)
         include(depsfile)
     else
