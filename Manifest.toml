@@ -40,12 +40,6 @@ uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
-[[Nullables]]
-deps = ["Compat"]
-git-tree-sha1 = "23258f849603ad4fed3ce7dbcb8c0658920fa5ef"
-uuid = "4d1e1d77-625e-5b40-9113-a560ec7a8ecd"
-version = "0.0.5"
-
 [[Pkg]]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 

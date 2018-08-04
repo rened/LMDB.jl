@@ -1,6 +1,6 @@
 module LMDB
 
-    using Nullables, Pkg, Libdl
+    using Pkg, Libdl
 
     import Base: open, close, getindex, setindex!, put!, start, reset,
                  isopen, count, delete!, info, get, show
